@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OM Sans: Probe 4</title>
+<title>OM Sans: Probe 5</title>
 <style>
   @font-face { font-family: "MontOrig"; font-weight: 400; src: url(data:font/woff2;base64,__MREG__) format("woff2"); }
   @font-face { font-family: "MontOrig"; font-weight: 600; src: url(data:font/woff2;base64,__MSEMI__) format("woff2"); }
@@ -44,14 +44,15 @@
 </head>
 <body>
 <div class="wrap" style="padding-bottom:6px">
-  <h1 class="page">OM Sans, Probe 4</h1>
-  <p class="lead">Links Montserrat, rechts der Prototyp. Neu: Anführungszeichen als Keile, ck- und ch-Ligatur, rz nur noch am Wortende verbunden (im Wortinneren per Stilset), die deutsche 1 auch bei den Mediävalziffern, eine ß-Variante. Die Schalter oben wirken nur rechts.</p>
+  <h1 class="page">OM Sans, Probe 5</h1>
+  <p class="lead">Links Montserrat, rechts der Prototyp. Neu gegenüber Probe 4: ck und ch unten verbunden (jetzt optional), rz nur noch zusammen mit dem Schluss-z, neue ß-Variante aus langem s und ʒ. Die Schalter oben wirken nur rechts.</p>
 </div>
 <div class="bar"><div class="wrap">
   <label><input type="checkbox" id="onum"> Mediävalziffern im Fließtext</label>
   <label><input type="checkbox" id="ss02" checked> Schluss-z in Überschriften</label>
   <label><input type="checkbox" id="ss03"> rz auch im Wortinneren</label>
   <label><input type="checkbox" id="ss04"> ß-Variante</label>
+  <label><input type="checkbox" id="ss05" checked> ck/ch-Ligatur</label>
   <label>Textgröße <input type="range" id="size" min="14" max="22" value="17"></label>
 </div></div>
 
@@ -73,7 +74,7 @@
 
   <div class="section">
     <h3>2. ck und ch</h3>
-    <p class="lead">Das obere Ende des c läuft als Steg in den Stamm von k bzw. h. Standardmäßig an.</p>
+    <p class="lead">Zweiter Versuch: Der Bauch des c läuft unten als Steg auf der Grundlinie in den Stamm von k bzw. h. Jetzt optional (Stilset ss05), Schalter oben.</p>
     <div class="pair">
       <div class="col mont"><p class="big">Blick, Glück, zurück<br>ich, Sache, Schutz</p></div>
       <div class="col om"><p class="big">Blick, Glück, zurück<br>ich, Sache, Schutz</p></div>
@@ -82,13 +83,13 @@
   </div>
 
   <div class="section">
-    <h3>3. rz am Wortende</h3>
-    <p class="lead">rz verbindet sich nur noch am Wortende. Bei Vorsilben (erzählen, verzichten) bleibt es getrennt, außer du schaltest oben „rz auch im Wortinneren“ ein.</p>
+    <h3>3. rz mit Schluss-z</h3>
+    <p class="lead">rz verbindet sich jetzt nur noch zusammen mit dem Schluss-z am Wortende (rʒ). Ohne Schluss-z bleibt rz getrennt, auch bei erzählen und verzichten. Unten mit eingeschaltetem Schluss-z.</p>
     <div class="pair">
       <div class="col mont"><p class="big">kurz, Herz, schwarz<br>erzählen, verzichten</p></div>
-      <div class="col om"><p class="big">kurz, Herz, schwarz<br>erzählen, verzichten</p></div>
+      <div class="col om"><p class="big" style="font-feature-settings:var(--f), 'ss02' 1">kurz, Herz, schwarz<br>erzählen, verzichten</p></div>
     </div>
-    <div class="fb" data-k="rz am Wortende"></div>
+    <div class="fb" data-k="rz mit Schluss-z"></div>
   </div>
 
   <div class="section">
@@ -103,7 +104,7 @@
 
   <div class="section">
     <h3>5. ß</h3>
-    <p class="lead">Rechts oben das normale ß, darunter die Variante: oberer Bogen wie gehabt, darunter Diagonale und Bauch des ʒ, angelehnt an die historische Form aus langem s und z. Ein erster Wurf.</p>
+    <p class="lead">Rechts oben das normale ß, darunter die neue Variante: Stamm und Haken des langen s, rechts daneben das ʒ mit Balken auf x-Höhe und leichter Unterlänge. Die herausragende Spitze ist weg.</p>
     <div class="pair">
       <div class="col mont"><p class="big">Straße, groß, Gruß</p></div>
       <div class="col om"><p class="big">Straße, groß, Gruß<br><span style="font-feature-settings:'liga' 1, 'ss04' 1">Straße, groß, Gruß</span></p></div>
@@ -126,8 +127,8 @@
 <script>
 const CHOICES = ["behalten", "anpassen", "weglassen"];
 let st = {};
-try { st = JSON.parse(localStorage.getItem("omsans-probe4") || "{}"); } catch(e) {}
-function save(){ try { localStorage.setItem("omsans-probe4", JSON.stringify(st)); } catch(e) {} out(); }
+try { st = JSON.parse(localStorage.getItem("omsans-probe5") || "{}"); } catch(e) {}
+function save(){ try { localStorage.setItem("omsans-probe5", JSON.stringify(st)); } catch(e) {} out(); }
 document.querySelectorAll(".fb").forEach(fb => {
   const k = fb.dataset.k; const s = st[k] || (st[k] = {c:null, t:""});
   const choices = k === "Gesamt" ? ["weiter so", "anderer Weg", "abbrechen"] : CHOICES;
@@ -153,13 +154,14 @@ function feats(){
   const f = ['"liga" 1'];
   if (document.getElementById("ss03").checked) f.push('"ss03" 1');
   if (document.getElementById("ss04").checked) f.push('"ss04" 1');
+  if (document.getElementById("ss05").checked) f.push('"ss05" 1');
   root.setProperty("--f", f.join(", "));
   const fh = [...f]; if (document.getElementById("ss02").checked) fh.push('"ss02" 1');
   root.setProperty("--fh", fh.join(", "));
   const fb = [...f]; if (document.getElementById("onum").checked) fb.push('"onum" 1');
   root.setProperty("--fb", fb.join(", "));
 }
-["ss02","ss03","ss04","onum"].forEach(id => document.getElementById(id).onchange = feats);
+["ss02","ss03","ss04","ss05","onum"].forEach(id => document.getElementById(id).onchange = feats);
 feats();
 </script>
 </body>

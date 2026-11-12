@@ -75,13 +75,15 @@ def make_tt(font):
     add_glyph(font, "t_t", g, 2 * w, g.xMin)
 
 
-def make_lig(font, left, right, name, tighten=20, band=None):
+def make_lig(font, left, right, name, tighten=20, band=None, cut_left=None):
     """Ligatur aus zwei Glyphen, verbunden durch einen waagerechten Steg.
     Standard-Steghöhe = t-Querbalken (= Oberkante z); sonst band=(y0, y1)."""
     gs = font.getGlyphSet()
     _, _, y0, y1 = crossbar(gs) if band is None else (None, None, *band)
     w = gs[left].width - tighten
     a = outline(gs, left)
+    if cut_left is not None:   # z. B. unteren Auslauf des c entfernen, damit der Bogen in den Steg übergeht
+        a = pathops.op(a, _rect(*cut_left), pathops.PathOp.DIFFERENCE)
     b = outline(gs, right, dx=w)
     # rechtes Ende des linken Glyphen auf Balkenhöhe, linkes Ende des rechten
     def ends(name, dx):
@@ -196,45 +198,31 @@ def wedge_quotes(font):
 
 
 def make_eszett_alt(font):
-    """ß-Variante in der historischen Form aus langem s und ʒ: oben der Bogen des ß,
-    rechts darunter Diagonale und Bauch des ʒ."""
-    from fontTools.pens.recordingPen import DecomposingRecordingPen
+    """ß-Variante als Verbindung von langem s (ſ) und ʒ: Stamm und Haken des ſ
+    deutlich sichtbar, rechts daneben ʒ mit oberem Balken auf x-Höhe, leicht unter die Grundlinie."""
     gs = font.getGlyphSet()
-    ss = outline(gs, "germandbls")
-    asc = max(y for op, a in _rec(gs, "germandbls") for x, y in a)
-    xh = gs["x"] and max(y for op, a in _rec(gs, "x") for x, y in a)
-    # Oberteil des ß: alles oberhalb von 0.78 * Oberlänge, plus Stamm
-    top_clip = _rect(-100, asc * 0.74, 2000, 2000)
-    upper = pathops.op(ss, top_clip, pathops.PathOp.INTERSECTION)
-    stem_r = min(x for op, a in _rec(gs, "germandbls") for x, y in a if x > 150 and y < 50 and x < 250) if False else None
-    rec = _rec(gs, "germandbls")
-    pts = [p for op, a in rec for p in a]
-    stem_l = min(x for x, y in pts)
-    stem_rx = sorted({x for x, y in pts if y == 0})[-1]          # rechter Stammrand am Fuß
-    stem = _rect(stem_l, 0, stem_rx, asc * 0.80)
-    # ʒ ohne oberen Balken
-    ez = outline(gs, font.getBestCmap()[0x0292])
-    ez_pts = [p for op, a in _rec(gs, font.getBestCmap()[0x0292]) for p in a]
-    ez_top = max(y for x, y in ez_pts)
-    bar_low = sorted({y for x, y in ez_pts if y > ez_top * 0.8})[0]
-    ez_body = pathops.op(ez, _rect(-500, -1000, 2000, bar_low + 1), pathops.PathOp.INTERSECTION)
-    # so verschieben, dass die Diagonale am rechten Ende des Bogens ansetzt und der Bauch auf der Grundlinie sitzt
-    ez_minx = min(x for x, y in ez_pts); ez_miny = min(y for x, y in ez_pts)
-    right_end = max(x for x, y in pts if y > asc * 0.70)
-    dx = right_end - max(x for x, y in ez_pts if abs(y - bar_low) < 5) + 10
-    dy = -ez_miny
+    cm = font.getBestCmap()
+    ls = outline(gs, "longs")
+    ls_pts = [p for op, a in _rec(gs, "longs") for p in a]
+    stem_l = sorted({x for x, y in ls_pts if y == 0})[0]
+    stem_r = sorted({x for x, y in ls_pts if y == 0})[-1]
+    # Querstrich des ſ links vom Stamm entfernen
+    ls = pathops.op(ls, _rect(stem_l, -10, 3000, 3000), pathops.PathOp.INTERSECTION)
+    ez_name = cm[0x0292]
+    ez = outline(gs, ez_name)
+    ez_pts = [p for op, a in _rec(gs, ez_name) for p in a]
+    top = max(y for x, y in ez_pts)
+    xh = max(y for op, a in _rec(gs, "x") for x, y in a)
+    sy = 0.82
+    dy = xh - top * sy
+    dx = stem_r - min(x for x, y in ez_pts if y > top * 0.9) - 12
     moved = pathops.Path()
-    ez_body.draw(TransformPen(moved.getPen(), (1, 0, 0, 1, dx, dy)))
-    # Steg zwischen Bogenende und Diagonale
-    diag_top_y = bar_low + dy
-    link = _rect(right_end - 75 * asc / 742, diag_top_y - 5, right_end + 5, asc * 0.78)
-    # was links in den Stamm ragen würde, abschneiden
-    moved = pathops.op(moved, _rect(stem_rx + 40, -1000, 3000, 3000), pathops.PathOp.INTERSECTION)
-    res = upper
-    for part in (stem, moved, link):
-        res = pathops.op(res, part, pathops.PathOp.UNION)
+    ez.draw(TransformPen(moved.getPen(), (1, 0, 0, sy, dx, dy)))
+    # Auslauf unten links nicht in den Stamm laufen lassen
+    moved = pathops.op(moved, _rect(stem_r - 15, -1000, 3000, 3000), pathops.PathOp.INTERSECTION)
+    res = pathops.op(ls, moved, pathops.PathOp.UNION)
     g = to_glyph(res, gs); g.recalcBounds(font["glyf"])
-    add_glyph(font, "germandbls.ss04", g, max(font["hmtx"]["germandbls"][0], g.xMax + 50), g.xMin)
+    add_glyph(font, "germandbls.ss04", g, g.xMax + 45, g.xMin)
 
 
 def _rec(gs, name):
@@ -320,20 +308,21 @@ def merge_gsub(font, fea):
 
 FEA_TEMPLATE = """
 @BUCHSTABE = [__LETTERS__];
-lookup LIGS { sub t t by t_t; sub t z by t_z; sub c k by c_k; sub c h by c_h; } LIGS;
+lookup LIGS { sub t t by t_t; sub t z by t_z; } LIGS;
+lookup CKCH { sub c k by c_k; sub c h by c_h; } CKCH;
 lookup RZ_LIG { sub r z by r_z; } RZ_LIG;
-feature liga {
-    lookup LIGS;
-    ignore sub r' z' @BUCHSTABE;
-    sub r' lookup RZ_LIG z';
-} liga;
+feature liga { lookup LIGS; } liga;
+lookup RZ_FINA_LIG { sub r z by r_z.fina; } RZ_FINA_LIG;
 lookup ZFINA_SUB { sub z by z.fina; sub t_z by t_z.fina; sub r_z by r_z.fina; } ZFINA_SUB;
 feature ss02 {
+    ignore sub r' z' @BUCHSTABE;
+    sub r' lookup RZ_FINA_LIG z';
     ignore sub [z t_z r_z]' @BUCHSTABE;
     sub [z t_z r_z]' lookup ZFINA_SUB;
 } ss02;
 feature ss03 { lookup RZ_LIG; } ss03;
 feature ss04 { sub germandbls by germandbls.ss04; } ss04;
+feature ss05 { lookup CKCH; } ss05;
 """
 
 
@@ -376,9 +365,12 @@ def main(src, dst, style):
     cx = max(x for x, y in c_pts)
     cy = [y for x, y in c_pts if x == cx and y > 250][0]
     stroke = 62 * font["hmtx"]["c"][0] / 563
-    band = (cy - 20 - stroke / 2, cy - 20 + stroke / 2)
-    make_lig(font, "c", "k", "c_k", tighten=60, band=band)
-    make_lig(font, "c", "h", "c_h", tighten=60, band=band)
+    bottom = min(y for x, y in c_pts)
+    band = (bottom + 5, bottom + 5 + stroke * 0.95)      # Steg auf der Grundlinie
+    cmid = (min(x for x, y in c_pts) + cx) / 2
+    cut = (cmid + 40, band[1] - 2, cx + 50, 0.45 * max(y for x, y in c_pts))
+    make_lig(font, "c", "k", "c_k", tighten=60, band=band, cut_left=cut)
+    make_lig(font, "c", "h", "c_h", tighten=60, band=band, cut_left=cut)
     make_eszett_alt(font)
     make_zfina(font)
     make_lig(font, "t", "z.fina", "t_z.fina", tighten=-30)

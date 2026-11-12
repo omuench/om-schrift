@@ -9,7 +9,7 @@ TEXT = '''<h2>Befähigung statt Abhängigkeit, kurz und klar erklärt</h2>
 <p class="body">Seit 2022 begleite ich Unternehmen mit 50 bis 500 Mitarbeitenden. Ist das realistisch? Meistens schon, wenn alle mitziehen und der Nutzen spürbar ist. Mit freundlichem Gruß aus Dresden.</p>'''
 
 t = open("tools/proof_template.html", encoding="utf-8").read()
-for key, path in {"__REG__": "fonts/OMSans-Regular.woff2", "__SEMI__": "fonts/OMSans-SemiBold.woff2",
+for key, path in {"__REG__": "out/OMSans-Regular.woff2", "__SEMI__": "out/OMSans-SemiBold.woff2",
                   "__MREG__": "out/Montserrat-Regular.woff2", "__MSEMI__": "out/Montserrat-SemiBold.woff2"}.items():
     t = t.replace(key, b(path))
 t = t.replace("__TEXT__", TEXT)

@@ -2,14 +2,15 @@
 
 Prototyp einer eigenen Hausschrift, abgeleitet von Montserrat (SIL Open Font License 1.1, siehe OFL.txt).
 
-## Änderungen gegenüber Montserrat (Probe 4)
+## Änderungen gegenüber Montserrat (Probe 5)
 1. l mit kleinem Bogen am Fuß als Standard (aus Montserrats ss01, Bogen verkleinert, rechts mehr Luft). I bleibt schlicht.
 2. Ziffer 1 mit schrägem Aufstrich (deutsche Form), auch bei den Mediävalziffern.
-3. Ligaturen (Feature `liga`, standardmäßig an): `t_t`, `t_z`, `c_k`, `c_h`; `r_z` nur am Wortende.
+3. Ligaturen (Feature `liga`, standardmäßig an): `t_t`, `t_z`.
 4. Stilsets (optional):
-   - `ss02` Schluss-z: z, tz, rz am Wortende mit Unterlänge (ʒ)
+   - `ss02` Schluss-z: z, tz, rz am Wortende mit Unterlänge (ʒ); rz wird nur hier verbunden
    - `ss03` rz auch im Wortinneren verbinden
-   - `ss04` ß-Variante (Form aus langem s und ʒ)
+   - `ss04` ß-Variante (langes s + ʒ)
+   - `ss05` ck- und ch-Ligatur (unten verbunden, experimentell)
 5. Anführungszeichen und Apostroph als schräge Keile.
 
 ## Verwendung im CSS
