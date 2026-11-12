@@ -247,12 +247,15 @@ def make_eszett_alt(font):
 
     build("germandbls.v1", upper, asc * 0.80)
     # v2: linken Teil des Bogens weg, Stamm gerade bis zur Oberlänge
-    arc_r = pathops.op(upper, _rect(stem_rx - 8, -10, 3000, 3000), pathops.PathOp.INTERSECTION)
+    # Bogen erst knapp rechts vom Stamm beginnen lassen, damit der Ansatz nicht knubbelig wird
+    arc_r = pathops.op(upper, _rect(stem_rx, -10, 3000, 3000), pathops.PathOp.INTERSECTION)
     build("germandbls.v2", arc_r, asc)
     # v3: Bogen 45 Einheiten tiefer, Stamm steht oben über
     arc_low = pathops.Path()
     arc_r.draw(TransformPen(arc_low.getPen(), (1, 0, 0, 1, 0, -45 * asc / 742)))
-    build("germandbls.v3", arc_low, asc, off=45 * asc / 742)
+    # Stamm nur knapp über den Bogen, damit der Ansatz nicht knubbelig wirkt
+    arc_top = arc_low.bounds[3]
+    build("germandbls.v3", arc_low, arc_top + 28 * asc / 742, off=45 * asc / 742)
 
 
 def _rec(gs, name):
@@ -265,6 +268,29 @@ def _rect(x0, y0, x1, y1):
     p = pathops.Path()
     p.moveTo(x0, y0); p.lineTo(x1, y0); p.lineTo(x1, y1); p.lineTo(x0, y1); p.close()
     return p
+
+
+def smaller_osf_zero(font, f=0.95):
+    """Mediäval-0 minimal kleiner als 1 und 2 (Basislinie bleibt, Breite proportional)."""
+    gs = font.getGlyphSet()
+    from fontTools.pens.boundsPen import BoundsPen
+    bp = BoundsPen(gs); gs["zero.osf"].draw(bp)
+    x0, y0, x1, y1 = bp.bounds
+    cx = (x0 + x1) / 2
+    from fontTools.pens.cu2quPen import Cu2QuPen
+    tt = TTGlyphPen(gs)
+    gs["zero.osf"].draw(TransformPen(tt, (f, 0, 0, f, cx * (1 - f), y0 * (1 - f))))
+    g = tt.glyph(); g.recalcBounds(font["glyf"])
+    adv = font["hmtx"]["zero.osf"][0]
+    newadv = int(round(adv - (x1 - x0) * (1 - f)))
+    # mittig in der neuen Breite
+    shift = (newadv - (g.xMax - g.xMin)) / 2 - g.xMin
+    tt2 = TTGlyphPen(gs)
+    from fontTools.pens.recordingPen import RecordingPen
+    rp = RecordingPen(); g.draw(rp, font["glyf"]); rp.replay(TransformPen(tt2, (1, 0, 0, 1, shift, 0)))
+    g2 = tt2.glyph(); g2.recalcBounds(font["glyf"])
+    font["glyf"]["zero.osf"] = g2
+    font["hmtx"]["zero.osf"] = (newadv, g2.xMin)
 
 
 def make_zfina(font):
@@ -354,6 +380,7 @@ feature ss03 { lookup RZ_LIG; } ss03;
 feature ss04 { sub germandbls by germandbls.v2; } ss04;
 feature cv01 { sub germandbls from [germandbls.v1 germandbls.v2 germandbls.v3]; } cv01;
 feature ss05 { lookup CKCH; } ss05;
+feature cv02 { sub [G Gbreve Gcaron Gcircumflex Gdotaccent uni0122] by [G.ss01 Gbreve.ss01 Gcaron.ss01 Gcircumflex.ss01 Gdotaccent.ss01 uni0122.ss01]; } cv02;
 """
 
 
@@ -388,6 +415,7 @@ def main(src, dst, style):
     german_one(font, "one")
     german_one(font, "one.osf")
     wedge_quotes(font)
+    smaller_osf_zero(font)
     make_tt(font)
     make_lig(font, "t", "z", "t_z", tighten=0)
     make_lig(font, "r", "z", "r_z", tighten=45)
@@ -424,12 +452,12 @@ def main(src, dst, style):
     io.close()
     inner_left = pathops.op(io, _rect(-1000, -1000, bcx, 5000), pathops.PathOp.INTERSECTION)
     clip = pathops.op(clip, inner_left, pathops.PathOp.DIFFERENCE)
-    make_lig(font, "c", "k", "c_k", tighten=60, band=band, cut_left=cut, bridge_from=cmid - 60, bridge_clip=clip)
-    make_lig(font, "c", "h", "c_h", tighten=60, band=band, cut_left=cut, bridge_from=cmid - 60, bridge_clip=clip)
+    make_lig(font, "c", "k", "c_k", tighten=100, band=band, cut_left=cut, bridge_from=cmid - 60, bridge_clip=clip)
+    make_lig(font, "c", "h", "c_h", tighten=100, band=band, cut_left=cut, bridge_from=cmid - 60, bridge_clip=clip)
     make_eszett_alt(font)
     make_zfina(font)
     make_lig(font, "t", "z.fina", "t_z.fina", tighten=-30)
-    make_lig(font, "r", "z.fina", "r_z.fina", tighten=60)
+    make_lig(font, "r", "z.fina", "r_z.fina", tighten=110)
     merge_gsub(font, FEA_TEMPLATE.replace("__LETTERS__", letters_class(font)))
     rename(font, style)
     font.save(dst)
