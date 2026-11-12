@@ -2,14 +2,37 @@
 
 Prototyp einer eigenen Hausschrift, abgeleitet von Montserrat (SIL Open Font License 1.1, siehe OFL.txt).
 
-## Änderungen gegenüber Montserrat (Probe 2)
+## Änderungen gegenüber Montserrat (Probe 4)
 1. l mit kleinem Bogen am Fuß als Standard (aus Montserrats ss01, Bogen verkleinert, rechts mehr Luft). I bleibt schlicht.
-2. Ziffer 1 mit schrägem Aufstrich (deutsche Form).
-3. Ligaturen `t_t`, `t_z`, `r_z`, Feature `liga` (standardmäßig aktiv).
-4. Schluss-z (`z.fina`, Form des ʒ) nur am Wortende, Stilset `ss02` (optional).
+2. Ziffer 1 mit schrägem Aufstrich (deutsche Form), auch bei den Mediävalziffern.
+3. Ligaturen (Feature `liga`, standardmäßig an): `t_t`, `t_z`, `c_k`, `c_h`; `r_z` nur am Wortende.
+4. Stilsets (optional):
+   - `ss02` Schluss-z: z, tz, rz am Wortende mit Unterlänge (ʒ)
+   - `ss03` rz auch im Wortinneren verbinden
+   - `ss04` ß-Variante (Form aus langem s und ʒ)
+5. Anführungszeichen und Apostroph als schräge Keile.
 
-Hinweis für CSS: Browser schalten Ligaturen ab, sobald `letter-spacing` gesetzt ist. Dann zusätzlich
-`font-feature-settings: "liga" 1;` setzen.
+## Verwendung im CSS
+
+```css
+@font-face { font-family: "OM Sans"; font-weight: 400; src: url(/fonts/OMSans-Regular.woff2) format("woff2"); }
+@font-face { font-family: "OM Sans"; font-weight: 600; src: url(/fonts/OMSans-SemiBold.woff2) format("woff2"); }
+
+body { font-family: "OM Sans", sans-serif; }
+
+/* Mediävalziffern im Fließtext, normale Ziffern in Tabellen, Preisen, Überschriften */
+p, li { font-variant-numeric: oldstyle-nums; }
+table, .preis, h1, h2, h3 { font-variant-numeric: lining-nums tabular-nums; }
+
+/* Browser schalten Ligaturen ab, sobald letter-spacing gesetzt ist: dann ausdrücklich einschalten */
+h1, h2, h3 { letter-spacing: -0.01em; font-feature-settings: "liga" 1; }
+
+/* Stilsets gezielt einsetzen, z. B. Schluss-z nur in Überschriften */
+h1, h2 { font-feature-settings: "liga" 1, "ss02" 1; }
+```
+
+### Ligaturen gezielt aufbrechen
+Wie `\/` in LaTeX: In HTML trennt der Zero Width Non-Joiner jede Ligatur, z. B. `Auf&zwnj;trag` oder `er&zwnj;zählen`.
 
 ## Bauen
     pip install fonttools skia-pathops brotli

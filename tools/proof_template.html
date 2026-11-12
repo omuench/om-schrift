@@ -3,36 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OM Sans: Probe 3</title>
+<title>OM Sans: Probe 4</title>
 <style>
   @font-face { font-family: "MontOrig"; font-weight: 400; src: url(data:font/woff2;base64,__MREG__) format("woff2"); }
   @font-face { font-family: "MontOrig"; font-weight: 600; src: url(data:font/woff2;base64,__MSEMI__) format("woff2"); }
   @font-face { font-family: "OM Sans"; font-weight: 400; src: url(data:font/woff2;base64,__REG__) format("woff2"); }
   @font-face { font-family: "OM Sans"; font-weight: 600; src: url(data:font/woff2;base64,__SEMI__) format("woff2"); }
-  :root { --bg:#f7f6f2; --card:#fff; --ink:#202a44; --muted:#596a83; --line:#e2e0d8; --accent:#eaaa00; }
+  :root { --bg:#f7f6f2; --card:#fff; --ink:#202a44; --muted:#596a83; --line:#e2e0d8; --f:"liga" 1; --fh:"liga" 1; --fb:"liga" 1; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font-family: system-ui, sans-serif; line-height:1.5; }
   .wrap { max-width:1150px; margin:0 auto; padding:36px 24px 60px; }
   h1.page { font-size:1.5rem; margin:0 0 4px; }
   .lead { color:var(--muted); max-width:72ch; margin:0 0 18px; }
   .bar { position:sticky; top:0; background:var(--bg); border-bottom:1px solid var(--line); z-index:3; }
-  .bar .wrap { padding:10px 24px; display:flex; gap:22px; flex-wrap:wrap; font-size:.9rem; color:var(--muted); }
-  .bar label { display:flex; gap:8px; align-items:center; }
-  .pair { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:18px 0 28px; }
+  .bar .wrap { padding:10px 24px; display:flex; gap:8px 22px; flex-wrap:wrap; font-size:.88rem; color:var(--muted); }
+  .bar label { display:flex; gap:7px; align-items:center; }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:14px 0 18px; }
   @media (max-width: 800px) { .pair { grid-template-columns:1fr; } }
   .col { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:24px 26px; }
   .tag { font-family: system-ui, sans-serif; font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:12px; }
   .mont { font-family:"MontOrig", sans-serif; }
-  .om { font-family:"OM Sans", sans-serif; font-feature-settings: "liga" 1; }
-  body.ss02 .om .zf { font-feature-settings: "liga" 1, "ss02" 1; }
-  body.ss02all .om, body.ss02all .om .zf { font-feature-settings: "liga" 1, "ss02" 1; }
+  .om { font-family:"OM Sans", sans-serif; font-feature-settings: var(--f); }
+  .om p.body { font-feature-settings: var(--fb); }
   .col h2 { font-weight:600; font-size:2rem; line-height:1.15; letter-spacing:-0.01em; margin:0 0 14px; }
+  .om h2 { font-feature-settings: var(--fh); }
   .col p { font-size:var(--size,17px); margin:0 0 12px; }
-  .col p.big { font-size:3.2rem; line-height:1.25; margin:0; }
-  .section { margin-top:34px; }
+  .col p.big { font-size:3rem; line-height:1.25; margin:0; }
+  .section { margin-top:30px; }
   .section h3 { font-size:1.1rem; margin:0 0 4px; }
   .section .lead { margin-bottom:4px; }
-  .fb { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 20px; display:grid; gap:10px; margin-top:6px; }
+  .fb { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 20px; display:grid; gap:10px; }
   .row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; font-size:.85rem; }
   .row > span { width:110px; color:var(--muted); }
   button.chip { font:inherit; font-size:.82rem; border:1px solid var(--line); background:transparent; color:var(--ink); border-radius:999px; padding:3px 11px; cursor:pointer; }
@@ -40,18 +40,18 @@
   textarea { flex:1; min-width:220px; font:inherit; font-size:.85rem; padding:6px 10px; border:1px solid var(--line); border-radius:6px; background:var(--bg); color:var(--ink); }
   pre { white-space:pre-wrap; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px; font-size:.85rem; }
   .btn { font:inherit; border:1px solid var(--ink); background:var(--ink); color:#fff; border-radius:6px; padding:6px 14px; cursor:pointer; }
-  mark { background: rgba(234,170,0,.28); color: inherit; padding:0 1px; border-radius:2px; }
 </style>
 </head>
 <body>
 <div class="wrap" style="padding-bottom:6px">
-  <h1 class="page">OM Sans, Probe 3</h1>
-  <p class="lead">Links das Original Montserrat, rechts der Prototyp. Neu gegenüber Probe 2: Die 1 hat einen längeren, flacheren Aufstrich und etwas mehr Breite. tz und rz gibt es jetzt auch mit Schluss-z (am Wortende, im Stilset). Etwas mehr Abstand zwischen t und z. Alles andere wie Probe 2. Überschriften in SemiBold, Fließtext in Regular.</p>
+  <h1 class="page">OM Sans, Probe 4</h1>
+  <p class="lead">Links Montserrat, rechts der Prototyp. Neu: Anführungszeichen als Keile, ck- und ch-Ligatur, rz nur noch am Wortende verbunden (im Wortinneren per Stilset), die deutsche 1 auch bei den Mediävalziffern, eine ß-Variante. Die Schalter oben wirken nur rechts.</p>
 </div>
 <div class="bar"><div class="wrap">
-  <label><input type="checkbox" id="marks"> Änderungen markieren</label>
-  <label><input type="checkbox" id="zf" checked> Schluss-z in Überschriften</label>
-  <label><input type="checkbox" id="zall"> Schluss-z auch im Fließtext</label>
+  <label><input type="checkbox" id="onum"> Mediävalziffern im Fließtext</label>
+  <label><input type="checkbox" id="ss02" checked> Schluss-z in Überschriften</label>
+  <label><input type="checkbox" id="ss03"> rz auch im Wortinneren</label>
+  <label><input type="checkbox" id="ss04"> ß-Variante</label>
   <label>Textgröße <input type="range" id="size" min="14" max="22" value="17"></label>
 </div></div>
 
@@ -62,33 +62,53 @@
   </div>
 
   <div class="section">
-    <h3>1. I, l und 1</h3>
-    <p class="lead">I bleibt schlicht. Das l unterscheidet sich durch einen kleineren Bogen am Fuß und hat rechts mehr Luft. Die 1 hat jetzt einen längeren, flacheren Aufstrich.</p>
+    <h3>1. Anführungszeichen</h3>
+    <p class="lead">Schräge Keile statt Tropfen, auch beim Apostroph. Position und Größe wie vorher.</p>
     <div class="pair">
-      <div class="col mont"><p class="big">Il1 Illusion 11<br>Ist das Lilli? 2026</p></div>
-      <div class="col om"><p class="big">Il1 Illusion 11<br>Ist das Lilli? 2026</p></div>
+      <div class="col mont"><p class="big">„Gelebt“ statt ‚eingeführt‘, geht’s?</p></div>
+      <div class="col om"><p class="big">„Gelebt“ statt ‚eingeführt‘, geht’s?</p></div>
     </div>
-    <div class="fb" data-k="I, l und 1"></div>
+    <div class="fb" data-k="Anführungszeichen"></div>
   </div>
 
   <div class="section">
-    <h3>2. Ligaturen: tt, tz, rz</h3>
-    <p class="lead">tt wie gehabt. Neu: tz und rz, verbunden über den Querbalken bzw. den Arm des r zur Oberkante des z. Alle drei immer aktiv.</p>
+    <h3>2. ck und ch</h3>
+    <p class="lead">Das obere Ende des c läuft als Steg in den Stamm von k bzw. h. Standardmäßig an.</p>
     <div class="pair">
-      <div class="col mont"><p class="big">flotte Mitte, jetzt<br>Netz, Satz, kurz, Herz</p></div>
-      <div class="col om"><p class="big">flotte Mitte, jetzt<br>Netz, Satz, kurz, Herz</p></div>
+      <div class="col mont"><p class="big">Blick, Glück, zurück<br>ich, Sache, Schutz</p></div>
+      <div class="col om"><p class="big">Blick, Glück, zurück<br>ich, Sache, Schutz</p></div>
     </div>
-    <div class="fb" data-k="Ligaturen"></div>
+    <div class="fb" data-k="ck und ch"></div>
   </div>
 
   <div class="section">
-    <h3>3. Schluss-z</h3>
-    <p class="lead">Am Wortende wird z zum ʒ, jetzt auch innerhalb der Ligaturen tz und rz. Im Wortinneren (Herzen, Netze) bleibt die normale Ligatur. Nur im Stilset, standardmäßig aus.</p>
+    <h3>3. rz am Wortende</h3>
+    <p class="lead">rz verbindet sich nur noch am Wortende. Bei Vorsilben (erzählen, verzichten) bleibt es getrennt, außer du schaltest oben „rz auch im Wortinneren“ ein.</p>
     <div class="pair">
-      <div class="col mont"><p class="big">kurz und ganz<br>Netz, Herz, Satz<br>Herzen, Netze</p></div>
-      <div class="col om"><p class="big zf" style="font-feature-settings:'liga' 1, 'ss02' 1">kurz und ganz<br>Netz, Herz, Satz<br>Herzen, Netze</p></div>
+      <div class="col mont"><p class="big">kurz, Herz, schwarz<br>erzählen, verzichten</p></div>
+      <div class="col om"><p class="big">kurz, Herz, schwarz<br>erzählen, verzichten</p></div>
     </div>
-    <div class="fb" data-k="Schluss-z"></div>
+    <div class="fb" data-k="rz am Wortende"></div>
+  </div>
+
+  <div class="section">
+    <h3>4. Ziffern</h3>
+    <p class="lead">Oben die normalen Ziffern, unten die Mediävalziffern (Bücherzahlen). Die 1 hat in beiden die deutsche Form. Im Fließtext kannst du die Mediävalziffern oben einschalten.</p>
+    <div class="pair">
+      <div class="col mont"><p class="big">1980 bis 2026<br><span style="font-feature-settings:'onum' 1">1980 bis 2026</span></p></div>
+      <div class="col om"><p class="big">1980 bis 2026<br><span style="font-feature-settings:'liga' 1, 'onum' 1">1980 bis 2026</span></p></div>
+    </div>
+    <div class="fb" data-k="Ziffern"></div>
+  </div>
+
+  <div class="section">
+    <h3>5. ß</h3>
+    <p class="lead">Rechts oben das normale ß, darunter die Variante: oberer Bogen wie gehabt, darunter Diagonale und Bauch des ʒ, angelehnt an die historische Form aus langem s und z. Ein erster Wurf.</p>
+    <div class="pair">
+      <div class="col mont"><p class="big">Straße, groß, Gruß</p></div>
+      <div class="col om"><p class="big">Straße, groß, Gruß<br><span style="font-feature-settings:'liga' 1, 'ss04' 1">Straße, groß, Gruß</span></p></div>
+    </div>
+    <div class="fb" data-k="ß-Variante"></div>
   </div>
 
   <div class="section">
@@ -106,8 +126,8 @@
 <script>
 const CHOICES = ["behalten", "anpassen", "weglassen"];
 let st = {};
-try { st = JSON.parse(localStorage.getItem("omsans-probe3") || "{}"); } catch(e) {}
-function save(){ try { localStorage.setItem("omsans-probe3", JSON.stringify(st)); } catch(e) {} out(); }
+try { st = JSON.parse(localStorage.getItem("omsans-probe4") || "{}"); } catch(e) {}
+function save(){ try { localStorage.setItem("omsans-probe4", JSON.stringify(st)); } catch(e) {} out(); }
 document.querySelectorAll(".fb").forEach(fb => {
   const k = fb.dataset.k; const s = st[k] || (st[k] = {c:null, t:""});
   const choices = k === "Gesamt" ? ["weiter so", "anderer Weg", "abbrechen"] : CHOICES;
@@ -127,20 +147,20 @@ out();
 document.getElementById("copy").onclick = async () => {
   try { await navigator.clipboard.writeText(document.getElementById("out").textContent); document.getElementById("copied").textContent = "Kopiert."; }
   catch(e){ document.getElementById("copied").textContent = "Bitte markieren und kopieren."; } };
-document.getElementById("size").oninput = e => document.documentElement.style.setProperty("--size", e.target.value + "px");
-document.getElementById("zf").onchange = e => document.body.classList.toggle("ss02", e.target.checked);
-document.getElementById("zall").onchange = e => document.body.classList.toggle("ss02all", e.target.checked);
-document.body.classList.add("ss02");
-// Markierung: Stellen mit tt, I, l und z am Wortende
-const originals = new Map();
-document.getElementById("marks").onchange = e => {
-  document.querySelectorAll(".col p, .col h2").forEach(el => {
-    if (!originals.has(el)) originals.set(el, el.innerHTML);
-    el.innerHTML = e.target.checked
-      ? originals.get(el).replace(/(tt|I|l|z(?![a-zäöüß]))(?![^<]*>)/g, "<mark>$1</mark>")
-      : originals.get(el);
-  });
-};
+const root = document.documentElement.style;
+document.getElementById("size").oninput = e => root.setProperty("--size", e.target.value + "px");
+function feats(){
+  const f = ['"liga" 1'];
+  if (document.getElementById("ss03").checked) f.push('"ss03" 1');
+  if (document.getElementById("ss04").checked) f.push('"ss04" 1');
+  root.setProperty("--f", f.join(", "));
+  const fh = [...f]; if (document.getElementById("ss02").checked) fh.push('"ss02" 1');
+  root.setProperty("--fh", fh.join(", "));
+  const fb = [...f]; if (document.getElementById("onum").checked) fb.push('"onum" 1');
+  root.setProperty("--fb", fb.join(", "));
+}
+["ss02","ss03","ss04","onum"].forEach(id => document.getElementById(id).onchange = feats);
+feats();
 </script>
 </body>
 </html>

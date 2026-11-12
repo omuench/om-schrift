@@ -35,7 +35,7 @@ def render(fontpath, out, names):
             row.append(n)
     rows.append(row)
     fig, ax = plt.subplots(figsize=(14, 2.2 * len(rows)))
-    y = 0
+    y = 0; maxx = 0
     for r in rows:
         x = 0
         for n in r:
@@ -46,9 +46,10 @@ def render(fontpath, out, names):
                 ax.add_patch(PathPatch(Path(verts, pen.c), fc="black", ec="none"))
             ax.text(x, y - 330, n, fontsize=7, color="gray")
             x += gs[n].width + 60
+        maxx = max(maxx, x)
         y -= 1400
     ax.axhline(0, color="#ccc", lw=0.5)
-    ax.set_xlim(-50, 9000); ax.set_ylim(y + 1400 - 450, 1050)
+    ax.set_xlim(-50, max(maxx, 2500)); ax.set_ylim(y + 1400 - 450, 1050)
     ax.set_aspect("equal"); ax.axis("off")
     fig.savefig(out, dpi=110, bbox_inches="tight")
 
