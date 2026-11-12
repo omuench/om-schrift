@@ -198,31 +198,54 @@ def wedge_quotes(font):
 
 
 def make_eszett_alt(font):
-    """ß-Variante als Verbindung von langem s (ſ) und ʒ: Stamm und Haken des ſ
-    deutlich sichtbar, rechts daneben ʒ mit oberem Balken auf x-Höhe, leicht unter die Grundlinie."""
+    """ß-Varianten mit ʒ als unterem Teil (Grundform aus Probe 4, Spitze entschärft):
+      germandbls.v1  Bogen des ß wie bei Montserrat, darunter Diagonale und Bauch des ʒ
+      germandbls.v2  wie v1, aber Stamm gerade bis oben, der Bogen setzt rechts am Stamm an
+      germandbls.v3  wie v2, Bogen etwas tiefer, der Stamm steht oben sichtbar über
+    """
     gs = font.getGlyphSet()
     cm = font.getBestCmap()
-    ls = outline(gs, "longs")
-    ls_pts = [p for op, a in _rec(gs, "longs") for p in a]
-    stem_l = sorted({x for x, y in ls_pts if y == 0})[0]
-    stem_r = sorted({x for x, y in ls_pts if y == 0})[-1]
-    # Querstrich des ſ links vom Stamm entfernen
-    ls = pathops.op(ls, _rect(stem_l, -10, 3000, 3000), pathops.PathOp.INTERSECTION)
+    ss = outline(gs, "germandbls")
+    rec = _rec(gs, "germandbls")
+    pts = [p for op, a in rec for p in a]
+    asc = max(y for x, y in pts)
+    stem_l = min(x for x, y in pts)
+    stem_rx = sorted({x for x, y in pts if y == 0})[-1]
+    right_end = max(x for x, y in pts if y > asc * 0.70)
+    upper = pathops.op(ss, _rect(-100, asc * 0.74, 2000, 2000), pathops.PathOp.INTERSECTION)
+    # ʒ ohne oberen Balken
     ez_name = cm[0x0292]
     ez = outline(gs, ez_name)
     ez_pts = [p for op, a in _rec(gs, ez_name) for p in a]
-    top = max(y for x, y in ez_pts)
-    xh = max(y for op, a in _rec(gs, "x") for x, y in a)
-    sy = 0.82
-    dy = xh - top * sy
-    dx = stem_r - min(x for x, y in ez_pts if y > top * 0.9) - 12
-    moved = pathops.Path()
-    ez.draw(TransformPen(moved.getPen(), (1, 0, 0, sy, dx, dy)))
-    # Auslauf unten links nicht in den Stamm laufen lassen
-    moved = pathops.op(moved, _rect(stem_r - 15, -1000, 3000, 3000), pathops.PathOp.INTERSECTION)
-    res = pathops.op(ls, moved, pathops.PathOp.UNION)
-    g = to_glyph(res, gs); g.recalcBounds(font["glyf"])
-    add_glyph(font, "germandbls.ss04", g, g.xMax + 45, g.xMin)
+    ez_top = max(y for x, y in ez_pts)
+    ez_bot = min(y for x, y in ez_pts)
+    bar_low = sorted({y for x, y in ez_pts if y > ez_top * 0.75})[0]
+    ez_body = pathops.op(ez, _rect(-500, -1000, 2000, bar_low - 1), pathops.PathOp.INTERSECTION)
+    diag_r = max(x for x, y in ez_pts if abs(y - bar_low) < 15)
+
+    def lower_part(off):
+        # Diagonale soll im rechten Bogenstrich ansetzen (ca. 0.80 * Oberlänge), Bauch auf der Grundlinie
+        target = asc * 0.80 - off
+        sy = target / (bar_low - ez_bot)
+        dx = right_end - 15 - diag_r
+        part = pathops.Path()
+        ez_body.draw(TransformPen(part.getPen(), (1, 0, 0, sy, dx, -ez_bot * sy)))
+        return pathops.op(part, _rect(stem_rx + 40, -1000, 3000, 3000), pathops.PathOp.INTERSECTION)
+
+    def build(name, arc, stem_top, off=0):
+        res = pathops.op(arc, _rect(stem_l, 0, stem_rx, stem_top), pathops.PathOp.UNION)
+        res = pathops.op(res, lower_part(off), pathops.PathOp.UNION)
+        g = to_glyph(res, gs); g.recalcBounds(font["glyf"])
+        add_glyph(font, name, g, max(font["hmtx"]["germandbls"][0], g.xMax + 50), g.xMin)
+
+    build("germandbls.v1", upper, asc * 0.80)
+    # v2: linken Teil des Bogens weg, Stamm gerade bis zur Oberlänge
+    arc_r = pathops.op(upper, _rect(stem_rx - 8, -10, 3000, 3000), pathops.PathOp.INTERSECTION)
+    build("germandbls.v2", arc_r, asc)
+    # v3: Bogen 45 Einheiten tiefer, Stamm steht oben über
+    arc_low = pathops.Path()
+    arc_r.draw(TransformPen(arc_low.getPen(), (1, 0, 0, 1, 0, -45 * asc / 742)))
+    build("germandbls.v3", arc_low, asc, off=45 * asc / 742)
 
 
 def _rec(gs, name):
@@ -321,7 +344,8 @@ feature ss02 {
     sub [z t_z r_z]' lookup ZFINA_SUB;
 } ss02;
 feature ss03 { lookup RZ_LIG; } ss03;
-feature ss04 { sub germandbls by germandbls.ss04; } ss04;
+feature ss04 { sub germandbls by germandbls.v2; } ss04;
+feature cv01 { sub germandbls from [germandbls.v1 germandbls.v2 germandbls.v3]; } cv01;
 feature ss05 { lookup CKCH; } ss05;
 """
 
@@ -329,7 +353,7 @@ feature ss05 { lookup CKCH; } ss05;
 def letters_class(font):
     names = {n for cp, n in font.getBestCmap().items() if chr(cp).isalpha()}
     names |= {n for n in font.getGlyphOrder() if n in ("t_t", "t_z", "r_z", "c_k", "c_h", "z.fina",
-              "t_z.fina", "r_z.fina", "germandbls.ss04", "fi", "fl")}
+              "t_z.fina", "r_z.fina", "germandbls.v1", "germandbls.v2", "germandbls.v3", "fi", "fl")}
     return " ".join(sorted(names))
 
 
@@ -359,7 +383,7 @@ def main(src, dst, style):
     wedge_quotes(font)
     make_tt(font)
     make_lig(font, "t", "z", "t_z", tighten=0)
-    make_lig(font, "r", "z", "r_z")
+    make_lig(font, "r", "z", "r_z", tighten=45)
     gs = font.getGlyphSet()
     c_pts = [p for op, a in _rec(gs, "c") for p in a]
     cx = max(x for x, y in c_pts)
@@ -374,7 +398,7 @@ def main(src, dst, style):
     make_eszett_alt(font)
     make_zfina(font)
     make_lig(font, "t", "z.fina", "t_z.fina", tighten=-30)
-    make_lig(font, "r", "z.fina", "r_z.fina", tighten=-30)
+    make_lig(font, "r", "z.fina", "r_z.fina", tighten=35)
     merge_gsub(font, FEA_TEMPLATE.replace("__LETTERS__", letters_class(font)))
     rename(font, style)
     font.save(dst)
