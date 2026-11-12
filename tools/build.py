@@ -75,7 +75,7 @@ def make_tt(font):
     add_glyph(font, "t_t", g, 2 * w, g.xMin)
 
 
-def make_lig(font, left, right, name, tighten=20, band=None, cut_left=None):
+def make_lig(font, left, right, name, tighten=20, band=None, cut_left=None, bridge_from=None, bridge_clip=None):
     """Ligatur aus zwei Glyphen, verbunden durch einen waagerechten Steg.
     Standard-Steghöhe = t-Querbalken (= Oberkante z); sonst band=(y0, y1)."""
     gs = font.getGlyphSet()
@@ -96,10 +96,14 @@ def make_lig(font, left, right, name, tighten=20, band=None, cut_left=None):
             return min(xs), max(xs)
         return min(inband), max(inband)
     _, ar = ends(left, 0)
+    if bridge_from is not None:
+        ar = bridge_from + 8
     bl, _ = ends(right, w)
     bridge = pathops.Path()
     bridge.moveTo(ar - 8, y0); bridge.lineTo(bl + 8, y0)
     bridge.lineTo(bl + 8, y1); bridge.lineTo(ar - 8, y1); bridge.close()
+    if bridge_clip is not None:   # Steg nicht unter die Rundung des linken Glyphen ragen lassen
+        bridge = pathops.op(bridge, bridge_clip, pathops.PathOp.INTERSECTION)
     merged = pathops.op(pathops.op(a, b, pathops.PathOp.UNION), bridge, pathops.PathOp.UNION)
     g = to_glyph(merged, gs)
     g.recalcBounds(font["glyf"])
@@ -224,15 +228,18 @@ def make_eszett_alt(font):
     diag_r = max(x for x, y in ez_pts if abs(y - bar_low) < 15)
 
     def lower_part(off):
-        # Diagonale soll im rechten Bogenstrich ansetzen (ca. 0.80 * Oberlänge), Bauch auf der Grundlinie
+        # Diagonale setzt bündig an der Außenkante des Bogens an (ca. 0.80 * Oberlänge), Bauch auf der Grundlinie
         target = asc * 0.80 - off
         sy = target / (bar_low - ez_bot)
-        dx = right_end - 15 - diag_r
+        dx = right_end - diag_r
         part = pathops.Path()
         ez_body.draw(TransformPen(part.getPen(), (1, 0, 0, sy, dx, -ez_bot * sy)))
         return pathops.op(part, _rect(stem_rx + 40, -1000, 3000, 3000), pathops.PathOp.INTERSECTION)
 
     def build(name, arc, stem_top, off=0):
+        # Bogen unterhalb des Ansatzes der Diagonale abschneiden (sonst steht rechts außen ein Rest über)
+        cut_y = asc * 0.80 - off - 2
+        arc = pathops.op(arc, _rect(-100, cut_y, 3000, 3000), pathops.PathOp.INTERSECTION)
         res = pathops.op(arc, _rect(stem_l, 0, stem_rx, stem_top), pathops.PathOp.UNION)
         res = pathops.op(res, lower_part(off), pathops.PathOp.UNION)
         g = to_glyph(res, gs); g.recalcBounds(font["glyf"])
@@ -393,12 +400,36 @@ def main(src, dst, style):
     band = (bottom + 5, bottom + 5 + stroke * 0.95)      # Steg auf der Grundlinie
     cmid = (min(x for x, y in c_pts) + cx) / 2
     cut = (cmid + 40, band[1] - 2, cx + 50, 0.45 * max(y for x, y in c_pts))
-    make_lig(font, "c", "k", "c_k", tighten=60, band=band, cut_left=cut)
-    make_lig(font, "c", "h", "c_h", tighten=60, band=band, cut_left=cut)
+    # Ellipse um den Bauch des c: links davon folgt die Unterkante des Stegs der Rundung
+    import math
+    cx0 = min(x for x, y in c_pts); cy0 = min(y for x, y in c_pts); cy1 = max(y for x, y in c_pts)
+    ecx, ecy = cmid, (cy0 + cy1) / 2
+    erx, ery = cmid - cx0, (cy1 - cy0) / 2
+    oval = pathops.Path()
+    for i in range(72):
+        t = 2 * math.pi * i / 72
+        (oval.moveTo if i == 0 else oval.lineTo)(ecx + erx * math.cos(t), ecy + ery * math.sin(t))
+    oval.close()
+    clip = pathops.op(oval, _rect(ecx, -1000, 5000, 5000), pathops.PathOp.UNION)
+    # Innenraum des c (links der Mitte) aussparen, damit der Steg der inneren Rundung folgt
+    bcx = [x for x, y in c_pts if y == cy0][0]                     # Mitte des Bauchs
+    ix0 = min(x for x, y in c_pts if x > cx0 + 20)                   # linker Innenrand
+    iy0 = min(y for x, y in c_pts if y > cy0 + 20)                   # innen unten
+    iy1 = max(y for x, y in c_pts if y < cy1 - 20)                   # innen oben
+    io = pathops.Path()
+    icx, icy, irx, iry = bcx, (iy0 + iy1) / 2, bcx - ix0, (iy1 - iy0) / 2
+    for i in range(72):
+        t = 2 * math.pi * i / 72
+        (io.moveTo if i == 0 else io.lineTo)(icx + irx * math.cos(t), icy + iry * math.sin(t))
+    io.close()
+    inner_left = pathops.op(io, _rect(-1000, -1000, bcx, 5000), pathops.PathOp.INTERSECTION)
+    clip = pathops.op(clip, inner_left, pathops.PathOp.DIFFERENCE)
+    make_lig(font, "c", "k", "c_k", tighten=60, band=band, cut_left=cut, bridge_from=cmid - 60, bridge_clip=clip)
+    make_lig(font, "c", "h", "c_h", tighten=60, band=band, cut_left=cut, bridge_from=cmid - 60, bridge_clip=clip)
     make_eszett_alt(font)
     make_zfina(font)
     make_lig(font, "t", "z.fina", "t_z.fina", tighten=-30)
-    make_lig(font, "r", "z.fina", "r_z.fina", tighten=35)
+    make_lig(font, "r", "z.fina", "r_z.fina", tighten=60)
     merge_gsub(font, FEA_TEMPLATE.replace("__LETTERS__", letters_class(font)))
     rename(font, style)
     font.save(dst)

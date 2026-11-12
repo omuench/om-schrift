@@ -2,7 +2,7 @@
 
 Prototyp einer eigenen Hausschrift, abgeleitet von Montserrat (SIL Open Font License 1.1, siehe OFL.txt).
 
-## Änderungen gegenüber Montserrat (Probe 6)
+## Änderungen gegenüber Montserrat (Probe 7)
 1. l mit kleinem Bogen am Fuß als Standard (aus Montserrats ss01, Bogen verkleinert, rechts mehr Luft). I bleibt schlicht.
 2. Ziffer 1 mit schrägem Aufstrich (deutsche Form), auch bei den Mediävalziffern.
 3. Ligaturen (Feature `liga`, standardmäßig an): `t_t`, `t_z`.

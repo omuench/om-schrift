@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OM Sans: Probe 6</title>
+<title>OM Sans: Probe 7</title>
 <style>
   @font-face { font-family: "MontOrig"; font-weight: 400; src: url(data:font/woff2;base64,__MREG__) format("woff2"); }
   @font-face { font-family: "MontOrig"; font-weight: 600; src: url(data:font/woff2;base64,__MSEMI__) format("woff2"); }
@@ -45,8 +45,8 @@
 </head>
 <body>
 <div class="wrap" style="padding-bottom:6px">
-  <h1 class="page">OM Sans, Probe 6</h1>
-  <p class="lead">Links Montserrat, rechts der Prototyp. Neu gegenüber Probe 5: rz enger, drei ß-Varianten auf Basis von Probe 4 (Spitze entschärft, Stamm unterschiedlich sichtbar). ck/ch unverändert (Empfehlung: streichen). Die Schalter oben wirken nur rechts.</p>
+  <h1 class="page">OM Sans, Probe 7</h1>
+  <p class="lead">Links Montserrat, rechts der Prototyp. Neu gegenüber Probe 6: rz noch enger, ck/ch mit längerem Steg, der weiter ins c hineinläuft, ß ohne den Überstand rechts außen. Die Schalter oben wirken nur rechts.</p>
 </div>
 <div class="bar"><div class="wrap">
   <label><input type="checkbox" id="onum"> Mediävalziffern im Fließtext</label>
@@ -75,7 +75,7 @@
 
   <div class="section">
     <h3>2. ck und ch</h3>
-    <p class="lead">Unverändert aus Probe 5. Meine Empfehlung: streichen, siehe Nachricht.</p>
+    <p class="lead">Der Steg beginnt jetzt weiter links im Bauch des c und folgt dessen Rundung. Stilset ss05, Schalter oben.</p>
     <div class="pair">
       <div class="col mont"><p class="big">Blick, Glück, zurück<br>ich, Sache, Schutz</p></div>
       <div class="col om"><p class="big">Blick, Glück, zurück<br>ich, Sache, Schutz</p></div>
@@ -85,7 +85,7 @@
 
   <div class="section">
     <h3>3. rz mit Schluss-z</h3>
-    <p class="lead">rʒ jetzt enger gesetzt. Nur zusammen mit dem Schluss-z am Wortende; ohne Schluss-z bleibt rz getrennt.</p>
+    <p class="lead">rʒ noch etwas enger. Nur zusammen mit dem Schluss-z am Wortende; ohne Schluss-z bleibt rz getrennt.</p>
     <div class="pair">
       <div class="col mont"><p class="big">kurz, Herz, schwarz<br>erzählen, verzichten</p></div>
       <div class="col om"><p class="big" style="font-feature-settings:var(--f), 'ss02' 1">kurz, Herz, schwarz<br>erzählen, verzichten</p></div>
@@ -105,7 +105,7 @@
 
   <div class="section">
     <h3>5. ß</h3>
-    <p class="lead">Grundform aus Probe 4 (oben der Bogen, darunter Diagonale und Bauch des ʒ), die Spitze rechts ist weg. Die drei Varianten unterscheiden sich darin, wie sichtbar der erste senkrechte Strich oben ist.</p>
+    <p class="lead">Grundform aus Probe 4. Der Bogen endet jetzt genau dort, wo die Diagonale ansetzt, außen bündig, ohne Überstand. Die drei Varianten unterscheiden sich darin, wie sichtbar der erste senkrechte Strich oben ist.</p>
     <div class="pair">
       <div class="col mont"><p class="big">Straße, groß, Gruß</p><p class="note">Montserrat</p></div>
       <div class="col om">
@@ -132,8 +132,8 @@
 <script>
 const CHOICES = ["behalten", "anpassen", "weglassen"];
 let st = {};
-try { st = JSON.parse(localStorage.getItem("omsans-probe6") || "{}"); } catch(e) {}
-function save(){ try { localStorage.setItem("omsans-probe6", JSON.stringify(st)); } catch(e) {} out(); }
+try { st = JSON.parse(localStorage.getItem("omsans-probe7") || "{}"); } catch(e) {}
+function save(){ try { localStorage.setItem("omsans-probe7", JSON.stringify(st)); } catch(e) {} out(); }
 document.querySelectorAll(".fb").forEach(fb => {
   const k = fb.dataset.k; const s = st[k] || (st[k] = {c:null, t:""});
   const choices = k === "Gesamt" ? ["weiter so", "anderer Weg", "abbrechen"] : CHOICES;
