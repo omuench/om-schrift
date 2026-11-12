@@ -225,37 +225,93 @@ def make_eszett_alt(font):
     ez_bot = min(y for x, y in ez_pts)
     bar_low = sorted({y for x, y in ez_pts if y > ez_top * 0.75})[0]
     ez_body = pathops.op(ez, _rect(-500, -1000, 2000, bar_low - 1), pathops.PathOp.INTERSECTION)
-    diag_r = max(x for x, y in ez_pts if abs(y - bar_low) < 15)
+    diag_r = max(x for x, y in ez_pts if bar_low - 5 <= y <= bar_low + 25 and y < ez_top - 20)
+
+    import math
+    # Außenkante des oberen Bogens als Ellipse (zum Beschneiden der Diagonale oben)
+    up_pts = [(x, y) for x, y in pts if y > asc * 0.52]
+    ux0 = min(x for x, y in up_pts); ux1 = max(x for x, y in up_pts)
+    uy0 = min(y for x, y in up_pts); uy1 = asc
+
+    def ellipse(cx, cy, rx, ry, n=96):
+        e = pathops.Path()
+        for i in range(n):
+            t = 2 * math.pi * i / n
+            (e.moveTo if i == 0 else e.lineTo)(cx + rx * math.cos(t), cy + ry * math.sin(t))
+        e.close()
+        return e
 
     def lower_part(off):
-        # Diagonale setzt bündig an der Außenkante des Bogens an (ca. 0.80 * Oberlänge), Bauch auf der Grundlinie
+        # Diagonale setzt an der Außenkante des Bogens an (ca. 0.80 * Oberlänge), Bauch auf der Grundlinie
         target = asc * 0.80 - off
         sy = target / (bar_low - ez_bot)
-        dx = right_end - diag_r
+        # Anschlusspunkt etwas oberhalb der breitesten Stelle des Bogens, dort ist die Außenkante schon geneigt:
+        # die Diagonale trifft dann ohne senkrechten Absatz auf den Bogen
+        maxx_ = max(x for x, y in ez_pts)
+        tps = [(x, y) for x, y in ez_pts if bar_low - 5 <= y <= bar_low + 25 and y < ez_top - 20 and x > maxx_ * 0.5]
+        tl0_ = min(x for x, y in tps)
+        cand_ = [(x, y) for x, y in ez_pts if bar_low * 0.25 < y < bar_low * 0.6 and 0.2 * maxx_ < x < tl0_]
+        xd_ = min(x for x, y in cand_); yd_ = max(y for x, y in cand_ if x == xd_)
+        sl_ = (bar_low - yd_) / (tl0_ - xd_) * sy
+        y_join = target + 0.06 * asc
+        # echte Außenkante des Bogens auf Höhe y_join (Bogen ist bei v3 um off nach unten verschoben)
+        strip = pathops.op(upper, _rect(-100, y_join + off - 0.5, 3000, y_join + off + 0.5), pathops.PathOp.INTERSECTION)
+        x_join = strip.bounds[2] - 1
+        tr_goal = x_join - (y_join - target) / sl_
+        # tatsächliche Ober-Ecken der Diagonale (knapp unter der Schnittkante des ʒ)
+        st_ = pathops.op(ez_body, _rect(-500, bar_low - 4, 3000, bar_low - 2), pathops.PathOp.INTERSECTION)
+        body_l, body_r = st_.bounds[0], st_.bounds[2]
+        dx = tr_goal - body_r
         part = pathops.Path()
         ez_body.draw(TransformPen(part.getPen(), (1, 0, 0, sy, dx, -ez_bot * sy)))
-        return pathops.op(part, _rect(stem_rx + 40, -1000, 3000, 3000), pathops.PathOp.INTERSECTION)
+        # Diagonale nach oben verlängern, damit ihre Oberkante im Bogenstrich verschwindet (keine Stufe innen)
+        maxx = max(x for x, y in ez_pts)
+        top_pts = [(x, y) for x, y in ez_pts if bar_low - 5 <= y <= bar_low + 25 and y < ez_top - 20 and x > maxx * 0.5]
+        tl0 = min(x for x, y in top_pts); tl = body_l + dx; tr = body_r + dx
+        # unteres Ende der linken Diagonalkante bestimmt die Steigung
+        cand = [(x, y) for x, y in ez_pts if bar_low * 0.25 < y < bar_low * 0.6 and 0.2 * maxx < x < tl0]
+        xd = min(x for x, y in cand); yd = max(y for x, y in cand if x == xd)
+        slope = (bar_low - yd) / (tl0 - xd)
+        rise = 90 * asc / 742
+        run = rise / (slope * sy)
+        ext = pathops.Path()
+        ext.moveTo(tl, target - 3); ext.lineTo(tr, target - 3)
+        ext.lineTo(tr + run, target + rise); ext.lineTo(tl + run, target + rise); ext.close()
+        # oben an die Außenkante des Bogens anpassen
+        hull = ellipse((ux0 + ux1) / 2 - off * 0, (uy0 + uy1) / 2 - off, (ux1 - ux0) / 2 - 2, (uy1 - uy0) / 2 - 2)
+        ext = pathops.op(ext, hull, pathops.PathOp.INTERSECTION)
+        part = pathops.op(part, ext, pathops.PathOp.UNION)
+        part = pathops.op(part, _rect(stem_rx + 40, -1000, 3000, 3000), pathops.PathOp.INTERSECTION)
+        return part, (tr, target, slope * sy)
 
-    def build(name, arc, stem_top, off=0):
-        # Bogen unterhalb des Ansatzes der Diagonale abschneiden (sonst steht rechts außen ein Rest über)
+    def build(name, arc, stem_top, off=0, keep_left=False):
         cut_y = asc * 0.80 - off - 2
-        arc = pathops.op(arc, _rect(-100, cut_y, 3000, 3000), pathops.PathOp.INTERSECTION)
-        res = pathops.op(arc, _rect(stem_l, 0, stem_rx, stem_top), pathops.PathOp.UNION)
-        res = pathops.op(res, lower_part(off), pathops.PathOp.UNION)
+        keep = _rect(-100, cut_y, 3000, 3000)
+        if keep_left:   # linken Teil (Stamm und Schulter) aus dem Original behalten: kein Absatz am Stamm
+            keep = pathops.op(keep, _rect(-100, -10, stem_rx + keep_left, 3000), pathops.PathOp.UNION)
+        arc = pathops.op(arc, keep, pathops.PathOp.INTERSECTION)
+        lower, (tr, ty, sl) = lower_part(off)
+        # Bogenende entlang der rechten Kante der Diagonale abschneiden: kein Überstand rechts
+        cutter = pathops.Path()
+        cutter.moveTo(tr - 2000 / sl, ty - 2000); cutter.lineTo(tr + 800 / sl, ty + 800)
+        cutter.lineTo(4000, ty + 800); cutter.lineTo(4000, -3000); cutter.close()
+        arc = pathops.op(arc, cutter, pathops.PathOp.DIFFERENCE)
+        res = pathops.op(arc, _rect(stem_l, 0, stem_rx, stem_top if keep_left == 2 else max(stem_top, cut_y + 3)), pathops.PathOp.UNION)
+        res = pathops.op(res, lower, pathops.PathOp.UNION)
         g = to_glyph(res, gs); g.recalcBounds(font["glyf"])
         add_glyph(font, name, g, max(font["hmtx"]["germandbls"][0], g.xMax + 50), g.xMin)
 
-    build("germandbls.v1", upper, asc * 0.80)
+    build("germandbls.v1", ss, asc * 0.5, keep_left=2)
     # v2: linken Teil des Bogens weg, Stamm gerade bis zur Oberlänge
     # Bogen erst knapp rechts vom Stamm beginnen lassen, damit der Ansatz nicht knubbelig wird
-    arc_r = pathops.op(upper, _rect(stem_rx, -10, 3000, 3000), pathops.PathOp.INTERSECTION)
-    build("germandbls.v2", arc_r, asc)
+    arc_r = upper
+    build("germandbls.v2", arc_r, asc, keep_left=30)
     # v3: Bogen 45 Einheiten tiefer, Stamm steht oben über
     arc_low = pathops.Path()
     arc_r.draw(TransformPen(arc_low.getPen(), (1, 0, 0, 1, 0, -45 * asc / 742)))
     # Stamm nur knapp über den Bogen, damit der Ansatz nicht knubbelig wirkt
     arc_top = arc_low.bounds[3]
-    build("germandbls.v3", arc_low, arc_top + 28 * asc / 742, off=45 * asc / 742)
+    build("germandbls.v3", arc_low, arc_top + 28 * asc / 742, off=45 * asc / 742, keep_left=30)
 
 
 def _rec(gs, name):
@@ -270,7 +326,7 @@ def _rect(x0, y0, x1, y1):
     return p
 
 
-def smaller_osf_zero(font, f=0.95):
+def smaller_osf_zero(font, f=0.90):
     """Mediäval-0 minimal kleiner als 1 und 2 (Basislinie bleibt, Breite proportional)."""
     gs = font.getGlyphSet()
     from fontTools.pens.boundsPen import BoundsPen
@@ -291,6 +347,20 @@ def smaller_osf_zero(font, f=0.95):
     g2 = tt2.glyph(); g2.recalcBounds(font["glyf"])
     font["glyf"]["zero.osf"] = g2
     font["hmtx"]["zero.osf"] = (newadv, g2.xMin)
+
+
+def make_G_bar(font):
+    """G mit waagerechtem Querbalken nach innen am oberen Ende des senkrechten Strichs."""
+    gs = font.getGlyphSet()
+    pts = [p for op, a in _rec(gs, "G") for p in a]
+    xr = max(x for x, y in pts if y < 400)
+    top = max(y for x, y in pts if x == xr and y < 450)
+    xl = max(x for x, y in pts if y == top and x < xr)          # linker Rand des senkrechten Strichs
+    t = (xr - xl) * 0.92
+    bar = _rect(xl - 0.34 * (xr - min(x for x, y in pts)), top - t, xr, top)
+    res = pathops.op(outline(gs, "G"), bar, pathops.PathOp.UNION)
+    g = to_glyph(res, gs); g.recalcBounds(font["glyf"])
+    add_glyph(font, "G.bar", g, *font["hmtx"]["G"])
 
 
 def make_zfina(font):
@@ -380,14 +450,14 @@ feature ss03 { lookup RZ_LIG; } ss03;
 feature ss04 { sub germandbls by germandbls.v2; } ss04;
 feature cv01 { sub germandbls from [germandbls.v1 germandbls.v2 germandbls.v3]; } cv01;
 feature ss05 { lookup CKCH; } ss05;
-feature cv02 { sub [G Gbreve Gcaron Gcircumflex Gdotaccent uni0122] by [G.ss01 Gbreve.ss01 Gcaron.ss01 Gcircumflex.ss01 Gdotaccent.ss01 uni0122.ss01]; } cv02;
+feature cv02 { sub G by G.bar; } cv02;
 """
 
 
 def letters_class(font):
     names = {n for cp, n in font.getBestCmap().items() if chr(cp).isalpha()}
     names |= {n for n in font.getGlyphOrder() if n in ("t_t", "t_z", "r_z", "c_k", "c_h", "z.fina",
-              "t_z.fina", "r_z.fina", "germandbls.v1", "germandbls.v2", "germandbls.v3", "fi", "fl")}
+              "t_z.fina", "r_z.fina", "germandbls.v1", "germandbls.v2", "germandbls.v3", "G.bar", "fi", "fl")}
     return " ".join(sorted(names))
 
 
@@ -455,6 +525,7 @@ def main(src, dst, style):
     make_lig(font, "c", "k", "c_k", tighten=100, band=band, cut_left=cut, bridge_from=cmid - 60, bridge_clip=clip)
     make_lig(font, "c", "h", "c_h", tighten=100, band=band, cut_left=cut, bridge_from=cmid - 60, bridge_clip=clip)
     make_eszett_alt(font)
+    make_G_bar(font)
     make_zfina(font)
     make_lig(font, "t", "z.fina", "t_z.fina", tighten=-30)
     make_lig(font, "r", "z.fina", "r_z.fina", tighten=110)

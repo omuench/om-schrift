@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OM Sans: Probe 8</title>
+<title>OM Sans: Probe 9</title>
 <style>
   @font-face { font-family: "MontOrig"; font-weight: 400; src: url(data:font/woff2;base64,__MREG__) format("woff2"); }
   @font-face { font-family: "MontOrig"; font-weight: 600; src: url(data:font/woff2;base64,__MSEMI__) format("woff2"); }
@@ -45,8 +45,8 @@
 </head>
 <body>
 <div class="wrap" style="padding-bottom:6px">
-  <h1 class="page">OM Sans, Probe 8</h1>
-  <p class="lead">Links Montserrat, rechts der Prototyp. Neu gegenüber Probe 7: ck/ch und rʒ enger, Mediäval-0 etwas kleiner, ß-Variante C mit ruhigerem Ansatz oben, dazu ein G mit Sporn zum Vergleich. Die Schalter oben wirken nur rechts.</p>
+  <h1 class="page">OM Sans, Probe 9</h1>
+  <p class="lead">Links Montserrat, rechts der Prototyp. Neu gegenüber Probe 8: ß-Übergänge links und rechts neu aufgebaut (keine Stufen mehr), Mediäval-0 um 10 % kleiner, G mit waagerechtem Querbalken. Die Schalter oben wirken nur rechts.</p>
 </div>
 <div class="bar"><div class="wrap">
   <label><input type="checkbox" id="onum"> Mediävalziffern im Fließtext</label>
@@ -95,7 +95,7 @@
 
   <div class="section">
     <h3>4. Ziffern</h3>
-    <p class="lead">Oben die normalen Ziffern, unten die Mediävalziffern. Neu: Die Mediäval-0 ist 5 % kleiner als 1 und 2. Im Fließtext kannst du die Mediävalziffern oben einschalten.</p>
+    <p class="lead">Oben die normalen Ziffern, unten die Mediävalziffern. Die Mediäval-0 ist jetzt 10 % kleiner als 1 und 2. Im Fließtext kannst du die Mediävalziffern oben einschalten.</p>
     <div class="pair">
       <div class="col mont"><p class="big">1980 bis 2026<br><span style="font-feature-settings:'onum' 1">1980 bis 2026</span></p></div>
       <div class="col om"><p class="big">1980 bis 2026<br><span style="font-feature-settings:'liga' 1, 'onum' 1">1980 bis 2026</span></p></div>
@@ -105,7 +105,7 @@
 
   <div class="section">
     <h3>5. ß</h3>
-    <p class="lead">Grundform aus Probe 4. Der Bogen endet jetzt genau dort, wo die Diagonale ansetzt, außen bündig, ohne Überstand. Die drei Varianten unterscheiden sich darin, wie sichtbar der erste senkrechte Strich oben ist.</p>
+    <p class="lead">Beide Übergänge neu: Links läuft der Bogen rund in den Stamm, rechts trifft die Diagonale ohne Absatz auf die Außenkante des Bogens. Die drei Varianten unterscheiden sich darin, wie sichtbar der erste senkrechte Strich oben ist.</p>
     <div class="pair">
       <div class="col mont"><p class="big">Straße, groß, Gruß</p><p class="note">Montserrat</p></div>
       <div class="col om">
@@ -119,7 +119,7 @@
 
   <div class="section">
     <h3>6. G</h3>
-    <p class="lead">Oben das G von Montserrat (waagerechter Balken nach innen), unten die Alternative aus Montserrats eigenem Bestand mit senkrechtem Sporn am Balken. Falls du mit „Querstrich“ etwas anderes meinst, sag es.</p>
+    <p class="lead">Oben das G von Montserrat (nur senkrechter Strich), unten mit waagerechtem Querbalken nach innen. Stilset cv02.</p>
     <div class="pair">
       <div class="col mont"><p class="big">Gruß, Glück, Gesamt</p></div>
       <div class="col om"><p class="big">Gruß, Glück, Gesamt</p><p class="big" style="font-feature-settings:var(--f), 'cv02' 1">Gruß, Glück, Gesamt</p></div>
@@ -142,8 +142,8 @@
 <script>
 const CHOICES = ["behalten", "anpassen", "weglassen"];
 let st = {};
-try { st = JSON.parse(localStorage.getItem("omsans-probe8") || "{}"); } catch(e) {}
-function save(){ try { localStorage.setItem("omsans-probe8", JSON.stringify(st)); } catch(e) {} out(); }
+try { st = JSON.parse(localStorage.getItem("omsans-probe9") || "{}"); } catch(e) {}
+function save(){ try { localStorage.setItem("omsans-probe9", JSON.stringify(st)); } catch(e) {} out(); }
 document.querySelectorAll(".fb").forEach(fb => {
   const k = fb.dataset.k; const s = st[k] || (st[k] = {c:null, t:""});
   const choices = k === "Gesamt" ? ["weiter so", "anderer Weg", "abbrechen"] : CHOICES;
